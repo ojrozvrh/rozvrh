@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Týdenní rozvrh</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one weekly timeline, 8:00-18:00 on the horizontal axis, one row per weekday; the board scales with width and scrolls sideways inside its own box on a phone. */
+:root {
+  --bg: #FFFBF3;
+  --surface: #FFFFFF;
+  --fg: #2B2B33;
+  --muted: #55546A;
+  --line: #EEE7D5;
+  --seg: #EFE8D6;
+  --chip: #2B2B33;
+  --chip-fg: #FFFFFF;
+  --cta: #2F5DA8;
+  --cta-fg: #FFFFFF;
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
+    --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
+  --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  padding-block: 28px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+.head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.head > div { min-width: 0; }
+h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height: 1.05; text-wrap: balance; }
+.sub { margin: 6px 0 0; font-size: 16px; font-weight: 600; color: var(--muted); }
+.cta {
+  display: inline-flex; align-items: center; gap: 14px; box-sizing: border-box;
+  min-height: 60px; padding: 8px 28px 8px 22px; border-radius: 14px;
+  background: var(--cta); color: var(--cta-fg); text-decoration: none;
+}
+.cta:hover { filter: brightness(1.08); }
+.cta:focus-visible, .seg button:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+.cta svg { flex: none; }
+.cta .t1 { display: block; font-size: 19px; font-weight: 800; line-height: 1.2; }
+.cta .t2 { display: block; font-size: 13px; font-weight: 600; line-height: 1.2; opacity: 0.9; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.controls .lbl { font-size: 16px; font-weight: 700; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--seg); border-radius: 999px; }
+.seg button {
+  min-height: 44px; padding: 0 22px; border: 0; border-radius: 999px; cursor: pointer;
+  font: 700 16px var(--font); background: transparent; color: var(--fg);
+}
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.scroll { overflow-x: auto; }
+.board { min-width: 860px; display: flex; flex-direction: column; gap: 8px; }
+.row { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; }
+.days { display: flex; flex-direction: column; gap: 10px; }
+.axis .track { position: relative; height: 24px; }
+.tick { position: absolute; top: 0; padding-left: 4px; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tick.last { transform: translateX(-100%); padding: 0 4px 0 0; }
+.day-track {
+  position: relative; height: 88px; box-sizing: border-box; border-radius: 16px;
+  background-color: var(--surface); border: 1px solid var(--line);
+  background-image: linear-gradient(to right, var(--line) 1px, transparent 1px); background-size: 10% 100%;
+}
+.chip {
+  justify-self: center; width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--chip); color: var(--chip-fg); font-size: 20px; font-weight: 800;
+}
+.item {
+  position: absolute; box-sizing: border-box; padding: 4px; border-radius: 12px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.item .big { font-weight: 800; line-height: 1.05; }
+.item .small { font-size: 12px; font-weight: 600; line-height: 1.1; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.legend span.sw { display: inline-block; width: 22px; height: 14px; border-radius: 5px; margin-right: 8px; vertical-align: -2px; }
+.abbr { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; font-weight: 600; color: var(--muted); }
+@page { size: A4 landscape; margin: 10mm; }
+@media print {
+  :root:root:root {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #2B2B33; --muted: #55546A; --line: #DDD6C4; --seg: #EFE8D6;
+    --chip: #2B2B33; --chip-fg: #FFFFFF; color-scheme: light;
+  }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { padding: 0; }
+  .no-print { display: none !important; }
+  .scroll { overflow: visible; }
+  .board { min-width: 0; }
+  .page { gap: 14px; }
+  h1 { font-size: 30px; }
+}
+</style>
+
+<div class="page">
+  <div class="head">
+    <div>
+      <h1>Týdenní rozvrh</h1>
+      <p class="sub">Pondělí až pátek · 21 vyučovacích hodin · kroužky odpoledne</p>
+    </div>
+    <a id="pdfLink" class="cta no-print" href="rozvrh-predmety.pdf" target="_blank" rel="noopener">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M6 15h12v6H6z"/></svg>
+      <span><span class="t1">Tisk / uložit jako PDF</span><span class="t2">Otevře PDF na A4 na šířku</span></span>
+    </a>
+  </div>
+
+  <div class="controls no-print">
+    <span class="lbl">Zobrazení</span>
+    <div class="seg" role="group" aria-label="Zobrazení rozvrhu">
+      <button type="button" id="btnSubjects" aria-pressed="true">Jednotlivé předměty</button>
+      <button type="button" id="btnBlock" aria-pressed="false">Celý školní blok</button>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="board" id="board"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div class="abbr" id="abbr"></div>
+</div>
+
+<script>
+(function () {
+  var PCT = 100 / 600, T0 = 480;
+  var SUB = {
+    'Čj': { n: 'Český jazyk', bg: '#FDE2C8', fg: '#6B2D00' },
+    'M': { n: 'Matematika', bg: '#CFE6FB', fg: '#0B3A66' },
+    'PRV': { n: 'Prvouka', bg: '#D5F0D0', fg: '#1F4D1A' },
+    'VV': { n: 'Výtvarná', bg: '#F9D3E6', fg: '#6A1A44' },
+    'PC': { n: 'Pracovní činnosti', bg: '#EADBF7', fg: '#45206B' },
+    'TV': { n: 'Tělesná', bg: '#FFF1B8', fg: '#5A4300' },
+    'AJ': { n: 'Angličtina', bg: '#C9F0EE', fg: '#0D4D49' },
+    'HV': { n: 'Hudební', bg: '#FAD4D4', fg: '#6B1A1A' },
+    'SOV': { n: '', bg: '#E3E3E8', fg: '#2B2B33' }
+  };
+  var SLOTS = [[480, 525], [535, 580], [600, 645], [655, 700], [710, 755]];
+  var COLORS = { son: '#1E7A46', dau: '#BE185D', school: '#2F5DA8' };
+  var DAYS = [
+    { l: 'Po', lessons: ['SOV', 'Čj', 'PRV', 'HV'], clubs: [{ n: 'Florbal', w: 'son', s: 840, e: 900 }, { n: 'Tancování', w: 'dau', s: 915, e: 960 }] },
+    { l: 'Út', lessons: ['Čj', 'M', 'VV', 'PC'], clubs: [{ n: 'Mazlíčci (DDM)', w: 'son', s: 930, e: 1050 }, { n: 'Barvička', w: 'dau', s: 990, e: 1050 }] },
+    { l: 'St', lessons: ['Čj', 'M', 'TV', 'Čj', 'AJ'], clubs: [{ n: 'Gymnathlon', w: 'son', s: 960, e: 1020 }, { n: 'Pohybovky', w: 'dau', s: 1020, e: 1080 }] },
+    { l: 'Čt', lessons: ['Čj', 'M', 'PRV', 'Čj'], clubs: [{ n: 'Yóga', w: 'son', s: 840, e: 900 }] },
+    { l: 'Pá', lessons: ['Čj', 'M', 'Čj', 'TV'], clubs: [] }
+  ];
+  var mode = 'subjects';
+
+  function fmt(m) { return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function item(s, e, bg, fg, big, bigSize, small, top, height, pad) {
+    var d = el('div', 'item');
+    d.style.left = ((s - T0) * PCT) + '%';
+    d.style.width = ((e - s) * PCT) + '%';
+    d.style.top = top + 'px';
+    d.style.height = height + 'px';
+    d.style.padding = pad + 'px';
+    d.style.background = bg;
+    d.style.color = fg;
+    d.setAttribute('aria-label', big + (small ? ', ' + small : '') + ', ' + fmt(s) + ' – ' + fmt(e));
+    var b = el('div', 'big', big);
+    b.style.fontSize = bigSize + 'px';
+    d.appendChild(b);
+    if (small) d.appendChild(el('div', 'small', small));
+    return d;
+  }
+
+  function render() {
+    var board = document.getElementById('board');
+    board.replaceChildren();
+
+    var axis = el('div', 'row axis');
+    axis.appendChild(el('div'));
+    var at = el('div', 'track');
+    for (var h = 8; h <= 18; h++) {
+      var t = el('div', 'tick' + (h === 18 ? ' last' : ''), h + ':00');
+      t.style.left = ((h - 8) * 10) + '%';
+      at.appendChild(t);
+    }
+    axis.appendChild(at);
+    board.appendChild(axis);
+
+    var days = el('div', 'days');
+    DAYS.forEach(function (d) {
+      var row = el('div', 'row');
+      row.appendChild(el('div', 'chip', d.l));
+      var tr = el('div', 'day-track');
+      if (mode === 'block') {
+        var s = SLOTS[0][0], e = SLOTS[d.lessons.length - 1][1];
+        tr.appendChild(item(s, e, COLORS.school, '#FFFFFF', fmt(s) + ' – ' + fmt(e), 26, 'Škola', 5, 76, 4));
+      } else {
+        d.lessons.forEach(function (c, i) {
+          var sub = SUB[c];
+          tr.appendChild(item(SLOTS[i][0], SLOTS[i][1], sub.bg, sub.fg, c, 26, sub.n, 5, 76, 4));
+        });
+      }
+      d.clubs.forEach(function (c, i) {
+        var overlap = d.clubs.some(function (o, j) { return j !== i && o.s < c.e && c.s < o.e; });
+        var narrow = (c.e - c.s) < 50;
+        tr.appendChild(item(c.s, c.e, COLORS[c.w], '#FFFFFF', c.n, (overlap || narrow) ? 14 : 16,
+          fmt(c.s) + ' – ' + fmt(c.e), overlap ? (i === 0 ? 5 : 47) : 5, overlap ? 36 : 76, overlap ? 2 : 4));
+      });
+      row.appendChild(tr);
+      days.appendChild(row);
+    });
+    board.appendChild(days);
+
+    var lg = document.getElementById('legend');
+    lg.replaceChildren();
+    function sw(color, text) {
+      var w = el('div');
+      var s = el('span', 'sw');
+      s.style.background = color;
+      w.appendChild(s);
+      w.appendChild(document.createTextNode(text));
+      lg.appendChild(w);
+    }
+    if (mode === 'block') sw(COLORS.school, 'Škola (od – do)');
+    sw(COLORS.son, 'Kroužky syna');
+    sw(COLORS.dau, 'Kroužky dcery');
+
+    var ab = document.getElementById('abbr');
+    ab.replaceChildren();
+    if (mode === 'subjects') {
+      ['Čj – český jazyk', 'M – matematika', 'PRV – prvouka', 'VV – výtvarná výchova', 'PC – pracovní činnosti',
+       'TV – tělesná výchova', 'AJ – angličtina', 'HV – hudební výchova'].forEach(function (t) { ab.appendChild(el('div', null, t)); });
+    }
+
+    document.getElementById('btnSubjects').setAttribute('aria-pressed', String(mode === 'subjects'));
+    document.getElementById('btnBlock').setAttribute('aria-pressed', String(mode === 'block'));
+    document.getElementById('pdfLink').setAttribute('href', mode === 'block' ? 'rozvrh-blok.pdf' : 'rozvrh-predmety.pdf');
+  }
+
+  function setMode(m) {
+    mode = m;
+    try { history.replaceState(null, '', '#' + (m === 'block' ? 'blok' : 'predmety')); } catch (e) {}
+    render();
+  }
+  document.getElementById('btnSubjects').addEventListener('click', function () { setMode('subjects'); });
+  document.getElementById('btnBlock').addEventListener('click', function () { setMode('block'); });
+  window.addEventListener('hashchange', function () {
+    var m = location.hash === '#blok' ? 'block' : 'subjects';
+    if (m !== mode) { mode = m; render(); }
+  });
+  if (location.hash === '#blok') mode = 'block';
+  render();
+})();
+</script>
+
+</body>
+</html>
