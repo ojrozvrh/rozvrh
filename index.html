@@ -202,7 +202,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     'TV': { n: 'Tělesná', bg: '#FFF1B8', fg: '#5A4300' },
     'AJ': { n: 'Angličtina', bg: '#C9F0EE', fg: '#0D4D49' },
     'HV': { n: 'Hudební', bg: '#FAD4D4', fg: '#6B1A1A' },
-    'SOV': { n: '', bg: '#E3E3E8', fg: '#2B2B33' }
+    'SOV': { n: 'Společensko-občanská výuka', bg: '#E3E3E8', fg: '#2B2B33' }
   };
   var SLOTS = [[480, 525], [535, 580], [600, 645], [655, 700], [710, 755]];
   var COLORS = { son: '#1E7A46', dau: '#BE185D', school: '#2F5DA8' };
@@ -332,7 +332,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     ab.replaceChildren();
     if (mode === 'subjects') {
       ['Čj – český jazyk', 'M – matematika', 'PRV – prvouka', 'VV – výtvarná výchova', 'PC – pracovní činnosti',
-       'TV – tělesná výchova', 'AJ – angličtina', 'HV – hudební výchova'].forEach(function (t) { ab.appendChild(el('div', null, t)); });
+       'TV – tělesná výchova', 'AJ – angličtina', 'HV – hudební výchova', 'SOV – společensko-občanská výuka'].forEach(function (t) { ab.appendChild(el('div', null, t)); });
     }
 
     document.getElementById('btnSubjects').setAttribute('aria-pressed', String(mode === 'subjects'));
