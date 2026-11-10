@@ -35,18 +35,19 @@
   --chip-fg: #FFFFFF;
   --cta: #2F5DA8;
   --cta-fg: #FFFFFF;
+  --today-bg: #E6EEFB;
   --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
-    --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33;
+    --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
-  --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33;
+  --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D;
   color-scheme: dark;
 }
 body {
@@ -120,6 +121,12 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .btn.main { background: var(--cta); border-color: var(--cta); color: var(--cta-fg); }
 .btn:hover { filter: brightness(1.08); }
 .btn:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+.row.today .chip { outline: 3px solid var(--cta); outline-offset: 2px; }
+@media screen {
+  .row.today .day-track { background-color: var(--today-bg); border-color: var(--cta); box-shadow: 0 0 0 2px var(--cta); }
+  .row.today .chip { background: var(--cta); color: var(--cta-fg); }
+}
+@media print { .row.today .chip { outline: 0; } }
 .hint { display: none; margin: 0; padding: 14px 16px; border-radius: 14px; background: #F5B400; color: #1F1700; font-size: 17px; font-weight: 800; line-height: 1.3; }
 .hint svg { flex: none; }
 @media (max-width: 719px) {
@@ -179,7 +186,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
       <a id="icsApple" class="btn main" href="webcal://ojrozvrh.github.io/rozvrh/rozvrh-blok.ics">iPhone: odebírat v Kalendáři</a>
     </div>
     <a id="icsDl" class="small-dl" href="rozvrh-blok.ics" download>Jen jednorázově stáhnout soubor .ics</a>
-    <p class="upd">Poslední aktualizace: 9. 11. 2026</p>
+    <p class="upd">Poslední aktualizace: 10. 11. 2026</p>
   </section>
 
   <div class="abbr" id="abbr"></div>
@@ -285,8 +292,10 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     board.appendChild(axis);
 
     var days = el('div', 'days');
-    DAYS.forEach(function (d) {
+    var todayIdx = new Date().getDay() - 1;
+    DAYS.forEach(function (d, di) {
       var row = el('div', 'row');
+      if (di === todayIdx) { row.className += ' today'; row.setAttribute('aria-current', 'date'); }
       row.appendChild(el('div', 'chip', d.l));
       var tr = el('div', 'day-track');
       var gp = el('div', 'gap');
@@ -358,6 +367,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     render();
   }
   window.addEventListener('resize', fit);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
 
   function setMode(m) {
     mode = m;
