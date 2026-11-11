@@ -36,18 +36,19 @@
   --cta: #2F5DA8;
   --cta-fg: #FFFFFF;
   --today-bg: #E6EEFB;
+  --pickup: #EEF3F5;
   --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
-    --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D;
+    --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D; --pickup: #2B3A40;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #17171C; --surface: #1F1F26; --fg: #F2F1F6; --muted: #B9B8C9; --line: #34343F; --seg: #2A2A33;
-  --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D;
+  --chip: #F2F1F6; --chip-fg: #17171C; --cta: #8DB1F2; --cta-fg: #0E1A33; --today-bg: #25324D; --pickup: #2B3A40;
   color-scheme: dark;
 }
 body {
@@ -90,9 +91,16 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .tick { position: absolute; top: 0; padding-left: 4px; font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tick.last { transform: translateX(-100%); padding: 0 4px 0 0; }
 .day-track {
-  position: relative; height: 88px; box-sizing: border-box; border-radius: 16px;
+  position: relative; height: 104px; box-sizing: border-box; border-radius: 16px;
   background-color: var(--surface); border: 1px solid var(--line);
 }
+.pickup { position: absolute; top: 0; bottom: 0; background-image: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 9px); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pk-legend { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: var(--muted); margin-top: -6px; }
+.pk-sw { flex: none; width: 34px; height: 18px; border-radius: 5px; border: 1px solid var(--muted); background-image: repeating-linear-gradient(135deg, var(--muted) 0 2px, transparent 2px 6px); }
+.pickup:focus-visible { outline: 3px solid var(--fg); outline-offset: -3px; }
+.pk-tip { display: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 30; padding: 6px 12px; border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 14px; font-weight: 800; line-height: 1.2; white-space: nowrap; font-variant-numeric: tabular-nums; box-shadow: 0 4px 14px rgba(0,0,0,.28); pointer-events: none; }
+.pickup.open .pk-tip { display: block; }
+@media print { .noprint { display: none; } .pk-tip { display: none !important; } .pickup { cursor: auto; } }
 .vl { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
 .gap { position: absolute; top: 0; bottom: 0; left: 45%; width: 8%; background-image: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 9px); }
 .chip {
@@ -110,6 +118,9 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .item .big { white-space: normal; overflow-wrap: normal; }
 .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; font-weight: 600; color: var(--muted); }
 .legend span.sw { display: inline-block; width: 22px; height: 14px; border-radius: 5px; margin-right: 8px; vertical-align: -2px; }
+details.lg > summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 8px 0; }
+details.lg > summary:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+details.lg[open] > summary { padding-bottom: 6px; }
 .abbr { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; font-weight: 600; color: var(--muted); }
 .cal { display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
 .cal h2 { margin: 0; font-size: 20px; font-weight: 800; }
@@ -142,21 +153,24 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 @media print {
   :root:root:root {
     --bg: #FFFFFF; --surface: #FFFFFF; --fg: #2B2B33; --muted: #55546A; --line: #DDD6C4; --seg: #EFE8D6;
-    --chip: #2B2B33; --chip-fg: #FFFFFF; color-scheme: light;
+    --chip: #2B2B33; --chip-fg: #FFFFFF; --pickup: #EEF3F5; color-scheme: light;
   }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  details.lg > summary { display: none; }
   body { padding: 0; }
   .no-print { display: none !important; }
   .scroll { overflow: visible; }
   .board { width: 100% !important; zoom: 1 !important; }
-  .page { gap: 14px; }
+  .page { gap: 4px; }
+  .pk-legend { margin-top: 0; }
+  .days { gap: 5px; }
   h1 { font-size: 30px; }
 }
 </style>
 
 <div class="page">
   <div class="head">
-    <div class="legend" id="legend" style="font-size: 17px; flex: 1 1 260px; min-width: 0"></div>
+    <details class="lg" style="flex: 1 1 260px; min-width: 0"><summary>Legenda barev</summary><div class="legend" id="legend" style="font-size: 16px"></div></details>
     <a id="pdfLink" class="cta no-print" href="rozvrh-predmety.pdf" target="_blank" rel="noopener">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="9" rx="2"/><path d="M6 15h12v6H6z"/></svg>
       <span><span class="t1">Tisk – na ledničku</span><span class="t2">Otevře PDF na A4 na šířku</span></span>
@@ -177,7 +191,9 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     <div class="board" id="board"></div>
   </div>
 
-  <div class="abbr"><div>Tancování (dcera): Studio VIVAjump, sál 2</div></div>
+  <div class="pk-legend"><span class="pk-sw"></span><span>Šrafovaně = vyzvednutí z družiny<span class="noprint"> (klepnutím zobrazíš časy)</span></span></div>
+
+  <details class="lg lgb"><summary>Poznámky</summary><div class="abbr"><div>Vyzvednutí z družiny (čipy jsou aktivní): 11:30–12:30, 13:15–13:45 a 15:00–16:30. Mimo tyto časy jsou neaktivní.</div><div>Tancování (dcera): Studio VIVAjump, sál 2</div></div></details>
 
   <section class="cal no-print" aria-labelledby="calh">
     <h2 id="calh">Přidat do kalendáře v telefonu</h2>
@@ -186,10 +202,10 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
       <a id="icsApple" class="btn main" href="webcal://ojrozvrh.github.io/rozvrh/rozvrh-blok.ics">iPhone: odebírat v Kalendáři</a>
     </div>
     <a id="icsDl" class="small-dl" href="rozvrh-blok.ics" download>Jen jednorázově stáhnout soubor .ics</a>
-    <p class="upd">Poslední aktualizace: 10. 11. 2026</p>
+    <p class="upd">Poslední aktualizace: 11. 11. 2026</p>
   </section>
 
-  <div class="abbr" id="abbr"></div>
+  <details class="lg lgb" id="dAbbr"><summary>Zkratky předmětů</summary><div class="abbr" id="abbr"></div></details>
 </div>
 
 <script>
@@ -213,6 +229,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     'HV': { n: 'Hudební', bg: '#FAD4D4', fg: '#6B1A1A' },
     'SOV': { n: 'Společensko-občanská výuka', bg: '#E3E3E8', fg: '#2B2B33' }
   };
+  var PICKUP = [[690, 750], [795, 825], [900, 990]];
   var SLOTS = [[480, 525], [535, 580], [600, 645], [655, 700], [710, 755]];
   var COLORS = { son: '#1E7A46', dau: '#BE185D', school: '#2F5DA8' };
   var DAYS = [
@@ -291,6 +308,11 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     axis.appendChild(at);
     board.appendChild(axis);
 
+    function togglePk(x) {
+      var was = x.classList.contains('open');
+      closePk();
+      if (!was) x.classList.add('open');
+    }
     var days = el('div', 'days');
     var todayIdx = new Date().getDay() - 1;
     DAYS.forEach(function (d, di) {
@@ -304,6 +326,18 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
         var vl = el('div', 'vl');
         vl.style.left = pos(h * 60) + '%';
         tr.appendChild(vl);
+      });
+      PICKUP.forEach(function (r) {
+        var pk = el('div', 'pickup');
+        pk.style.left = pos(r[0]) + '%';
+        pk.style.width = (pos(r[1]) - pos(r[0])) + '%';
+        pk.setAttribute('role', 'button');
+        pk.setAttribute('tabindex', '0');
+        pk.setAttribute('aria-label', 'Vyzvednutí z družiny ' + fmt(r[0]) + '–' + fmt(r[1]));
+        pk.appendChild(el('div', 'pk-tip', fmt(r[0]) + '–' + fmt(r[1])));
+        pk.addEventListener('click', function (ev) { ev.stopPropagation(); togglePk(pk); });
+        pk.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); togglePk(pk); } });
+        tr.appendChild(pk);
       });
       if (mode === 'block') {
         var s = SLOTS[0][0], e = SLOTS[d.lessons.length - 1][1];
@@ -327,10 +361,12 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 
     var lg = document.getElementById('legend');
     lg.replaceChildren();
-    function sw(color, text) {
+    function sw(color, text, border) {
       var w = el('div');
       var s = el('span', 'sw');
       s.style.background = color;
+      if (color.indexOf('repeating') === 0) s.style.backgroundImage = color;
+      if (border) s.style.boxShadow = 'inset 0 0 0 1px var(--muted)';
       w.appendChild(s);
       w.appendChild(document.createTextNode(text));
       lg.appendChild(w);
@@ -339,6 +375,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     sw(COLORS.son, 'Kroužky syna');
     sw(COLORS.dau, 'Kroužky dcery');
 
+    document.getElementById('dAbbr').hidden = mode !== 'subjects';
     var ab = document.getElementById('abbr');
     ab.replaceChildren();
     if (mode === 'subjects') {
@@ -355,6 +392,10 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
     document.getElementById('icsAndroid').setAttribute('href', 'https://calendar.google.com/calendar/r?cid=webcal://' + host);
     document.getElementById('icsApple').setAttribute('href', 'webcal://' + host);
   }
+
+  function closePk() { document.querySelectorAll('.pickup.open').forEach(function (n) { n.classList.remove('open'); }); }
+  document.addEventListener('click', closePk);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closePk(); });
 
   var BASE = 1000;
   function fit() {
