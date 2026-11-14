@@ -209,6 +209,12 @@ details.lg[open] > summary { padding-bottom: 6px; }
 </div>
 
 <script>
+/* Polyfills pro starší prohlížeče (např. Samsung TV 2017) */
+if (!Element.prototype.replaceChildren) { Element.prototype.replaceChildren = function () { while (this.firstChild) this.removeChild(this.firstChild); for (var i = 0; i < arguments.length; i++) { var a = arguments[i]; this.appendChild(typeof a === 'string' ? document.createTextNode(a) : a); } }; }
+if (!String.prototype.padStart) { String.prototype.padStart = function (n, c) { var s = String(this); c = c === undefined ? ' ' : String(c); while (s.length < n) s = c + s; return s.slice(-n); }; }
+if (window.NodeList && !NodeList.prototype.forEach) { NodeList.prototype.forEach = Array.prototype.forEach; }
+</script>
+<script>
 (function () {
   var T0 = 480;
   var HOURS = [8, 9, 10, 11, 12, 14, 15, 16, 17, 18];
