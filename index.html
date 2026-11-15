@@ -119,6 +119,19 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .wk-day.tdy { box-shadow: 0 0 0 3px #2F5DA8; box-shadow: 0 0 0 3px var(--cta); }
 @media print { .wk-btn, .work { display: none !important; } }
 html.tv details.lg:not(.lgb) { display: none !important; }
+html.tv .page { max-width: none; }
+html.tv body { padding: 12px 20px; }
+.page.wkon .scroll, .page.wkon .pk-legend, .page.wkon .hint { display: none !important; }
+.work.wk-full { display: flex; flex-direction: column; box-sizing: border-box; }
+.work.wk-full .wk-days { flex: 1 1 auto; min-height: 0; }
+.work.wk-full .wk-day { display: flex; flex-direction: column; justify-content: center; margin: 0 6px; }
+.work.wk-full .wk-title { font-size: 4vh; }
+.work.wk-full .wk-nav { width: 8vh; height: 6vh; font-size: 4vh; }
+.work.wk-full .wk-day b { font-size: 5.5vh; }
+.work.wk-full .wk-day small { font-size: 2.6vh; }
+.work.wk-full .wk-day .k { font-size: 4vh; margin-top: 2vh; }
+.work.wk-full .wk-day .t { font-size: 3.2vh; margin-top: 1vh; }
+.work.wk-full .wk-top { margin-bottom: 2vh; }
 .pickup:hover .pk-tip { display: block; }
 html.tv .cta, html.tv .cal, html.tv #dAbbr, html.tv .lgb { display: none !important; }
 html.nofg .page > * + * { margin-top: 20px; }
@@ -491,21 +504,23 @@ window.onerror = function (m, u, l, c) {
     try {
       var avail = box.clientWidth;
       if (tv) {
-        board.style.width = '100%'; TW = avail - 72; render();
+        board.style.transform = ''; board.style.webkitTransform = ''; box.style.height = '';
+        board.style.width = BASE + 'px'; TW = BASE - 72; render();
+        var H0 = board.offsetHeight;
+        if (H0 <= 0) return;
         try {
-          var Ht = board.offsetHeight;
-          var roomT = (window.innerHeight || 0) - (box.getBoundingClientRect().top + (window.pageYOffset || 0)) - 24;
-          if (Ht > 0 && roomT > 0 && roomT < Ht) {
-            var zt = Math.max(0.55, roomT / Ht);
-            board.style.width = (avail / zt) + 'px';
-            TW = avail / zt - 72;
-            render();
-            board.style.webkitTransformOrigin = '0 0'; board.style.transformOrigin = '0 0';
-            board.style.webkitTransform = 'scale(' + zt + ')'; board.style.transform = 'scale(' + zt + ')';
-            box.style.height = Math.ceil(board.offsetHeight * zt) + 'px';
-            box.style.overflow = 'hidden';
-          }
-        } catch (e3) {}
+          var topT = box.getBoundingClientRect().top + (window.pageYOffset || 0);
+          var roomT = (window.innerHeight || 0) - topT - 70;
+          var zt = Math.min(avail / BASE, roomT / H0);
+          if (!(zt > 0.3)) zt = Math.min(1, avail / BASE);
+          board.style.width = (avail / zt) + 'px';
+          TW = avail / zt - 72;
+          render();
+          board.style.webkitTransformOrigin = '0 0'; board.style.transformOrigin = '0 0';
+          board.style.webkitTransform = 'scale(' + zt + ')'; board.style.transform = 'scale(' + zt + ')';
+          box.style.height = Math.ceil(board.offsetHeight * zt) + 'px';
+          box.style.overflow = 'hidden';
+        } catch (e3) { board.style.width = '100%'; TW = avail - 72; render(); }
         return;
       }
       var z = Math.min(1, avail / BASE);
@@ -532,6 +547,7 @@ window.onerror = function (m, u, l, c) {
 
   function setMode(m) {
     mode = m;
+    if (!document.getElementById('work').hasAttribute('hidden')) setWork(false);
     try { history.replaceState(null, '', '#' + (m === 'block' ? 'blok' : 'predmety')); } catch (e) {}
     render();
   }
@@ -580,13 +596,27 @@ window.onerror = function (m, u, l, c) {
     var end = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
     document.getElementById('wkTitle').textContent = mon.getDate() + '. ' + (mon.getMonth() + 1) + '. – ' + end.getDate() + '. ' + (end.getMonth() + 1) + '.';
   }
-  document.getElementById('btnWork').addEventListener('click', function () {
+  function layoutWork() {
     var w = document.getElementById('work');
-    var open = w.hasAttribute('hidden');
-    if (open) { w.removeAttribute('hidden'); renderWork(); } else { w.setAttribute('hidden', ''); }
-    this.setAttribute('aria-pressed', String(open));
-    try { fit(); } catch (e) {}
+    if (w.hasAttribute('hidden')) return;
+    if (window.innerWidth >= 720 && window.innerWidth > window.innerHeight) {
+      w.className = 'work no-print wk-full';
+      w.style.height = '';
+      var top = w.getBoundingClientRect().top + (window.pageYOffset || 0);
+      w.style.height = Math.max(240, (window.innerHeight || 0) - top - 20) + 'px';
+    } else { w.className = 'work no-print'; w.style.height = ''; }
+  }
+  function setWork(on) {
+    var w = document.getElementById('work');
+    var pg = document.querySelector('.page');
+    if (on) { w.removeAttribute('hidden'); pg.className += ' wkon'; renderWork(); layoutWork(); }
+    else { w.setAttribute('hidden', ''); pg.className = pg.className.replace(/\s*wkon/g, ''); fit(); }
+    document.getElementById('btnWork').setAttribute('aria-pressed', String(on));
+  }
+  document.getElementById('btnWork').addEventListener('click', function () {
+    setWork(document.getElementById('work').hasAttribute('hidden'));
   });
+  window.addEventListener('resize', layoutWork);
   document.getElementById('wkPrev').addEventListener('click', function () { wkOff--; renderWork(); });
   document.getElementById('wkNext').addEventListener('click', function () { wkOff++; renderWork(); });
 
