@@ -472,7 +472,7 @@ window.onerror = function (m, u, l, c) {
     document.getElementById('icsApple').setAttribute('href', 'webcal://' + host);
   }
 
-  function closePk() { document.querySelectorAll('.pickup.open').forEach(function (n) { n.classList.remove('open'); }); }
+  function closePk() { var o = document.querySelectorAll('.pickup.open'); for (var i = 0; i < o.length; i++) o[i].classList.remove('open'); }
   document.addEventListener('click', closePk);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closePk(); });
 
@@ -618,7 +618,7 @@ window.onerror = function (m, u, l, c) {
       w.className = 'work no-print wk-full';
       w.style.height = '';
       var top = w.getBoundingClientRect().top + (window.pageYOffset || 0);
-      w.style.height = Math.max(240, (window.innerHeight || 0) - top - 20) + 'px';
+      w.style.height = Math.max(240, (window.innerHeight || 0) - top - 36) + 'px';
     } else { w.className = 'work no-print'; w.style.height = ''; }
   }
   function setWork(on) {
