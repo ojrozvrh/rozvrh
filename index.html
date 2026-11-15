@@ -223,6 +223,17 @@ details.lg[open] > summary { padding-bottom: 6px; }
 </div>
 
 <script>
+window.onerror = function (m, u, l, c) {
+  try {
+    if (!/tizen|smart-?tv|web0s|webos/i.test(navigator.userAgent)) return;
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;background:#fff;color:#b00;font:14px sans-serif;padding:6px 10px;border:2px solid #b00';
+    d.textContent = 'Chyba: ' + m + ' (řádek ' + l + ')';
+    document.body.appendChild(d);
+  } catch (e) {}
+};
+</script>
+<script>
 (function () {
   var T0 = 480;
   var HOURS = [8, 9, 10, 11, 12, 14, 15, 16, 17, 18];
@@ -444,6 +455,7 @@ details.lg[open] > summary { padding-bottom: 6px; }
     }
     try {
       var avail = box.clientWidth;
+      if (tv) { board.style.width = '100%'; TW = avail - 72; render(); return; }
       var z = Math.min(1, avail / BASE);
       reset();
       board.style.width = z < 1 ? BASE + 'px' : '100%';
@@ -460,7 +472,7 @@ details.lg[open] > summary { padding-bottom: 6px; }
       }
       apply(z, avail);
     } catch (e) {
-      try { reset(); board.style.width = '100%'; TW = Math.max(600, box.clientWidth) - 72; render(); } catch (e2) {}
+      try { reset(); board.style.width = '100%'; TW = Math.max(600, box.clientWidth) - 72; render(); } catch (e2) { setTimeout(function () { throw e2; }, 0); }
     }
   }
   window.addEventListener('resize', fit);
