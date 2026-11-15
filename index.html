@@ -266,7 +266,7 @@ window.onerror = function (m, u, l, c) {
   ];
   var mode = 'block';
 
-  function fmt(m) { return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+  function fmt(m) { return Math.floor(m / 60) + ':' + ((m % 60) < 10 ? '0' : '') + (m % 60); }
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
