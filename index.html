@@ -98,6 +98,27 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .pickup { position: absolute; top: 0; bottom: 0; background-image: linear-gradient(135deg, #EEE7D5 25%, transparent 25%, transparent 50%, #EEE7D5 50%, #EEE7D5 75%, transparent 75%, transparent); background-image: linear-gradient(135deg, var(--line) 25%, transparent 25%, transparent 50%, var(--line) 50%, var(--line) 75%, transparent 75%, transparent); background-size: 12px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .pk-legend { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #55546A; color: var(--muted); margin-top: -6px; }
 .pk-sw { flex: none; width: 34px; height: 18px; border-radius: 5px; border: 1px solid #55546A; border: 1px solid var(--muted); background-image: linear-gradient(135deg, #55546A 25%, transparent 25%, transparent 50%, #55546A 50%, #55546A 75%, transparent 75%, transparent); background-image: linear-gradient(135deg, var(--muted) 25%, transparent 25%, transparent 50%, var(--muted) 50%, var(--muted) 75%, transparent 75%, transparent); background-size: 8px 8px; }
+.wk-btn { font: 700 16px "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font: 700 16px var(--font); min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid #2B2B33; border: 2px solid var(--fg); background: transparent; color: #2B2B33; color: var(--fg); cursor: pointer; margin-left: 14px; }
+.wk-btn[aria-pressed="true"] { background: #2B2B33; background: var(--fg); color: #FFFBF3; color: var(--bg); }
+.wk-btn:focus-visible, .wk-nav:focus-visible { outline: 3px solid #2B2B33; outline: 3px solid var(--fg); outline-offset: 3px; }
+.work { background: #FFFFFF; background: var(--surface); border: 1px solid #EEE7D5; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px 16px; }
+.wk-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.wk-title { font-size: 17px; font-weight: 800; }
+.wk-nav { font: 800 18px "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font: 800 18px var(--font); width: 44px; height: 40px; border-radius: 10px; border: 1px solid #EEE7D5; border: 1px solid var(--line); background: #FFFBF3; background: var(--bg); color: #2B2B33; color: var(--fg); cursor: pointer; }
+.wk-days { display: flex; }
+.wk-day { flex: 1 1 0; min-width: 0; margin: 0 3px; padding: 10px 4px; border-radius: 12px; text-align: center; background: #FFFBF3; background: var(--bg); border: 1px solid #EEE7D5; border: 1px solid var(--line); box-sizing: border-box; }
+.wk-day b { display: block; font-size: 17px; font-weight: 800; }
+.wk-day small { display: block; font-size: 12px; font-weight: 600; color: #55546A; color: var(--muted); }
+.wk-day .k { display: block; margin-top: 6px; font-size: 16px; font-weight: 800; }
+.wk-day .t { display: block; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wk-day.f { background: #D5ECE4; border-color: #D5ECE4; color: #0D4F3E; }
+.wk-day.f small { color: #0D4F3E; }
+.wk-day.s { background: #D6E4F7; border-color: #D6E4F7; color: #153F78; }
+.wk-day.s small { color: #153F78; }
+.wk-day.v { color: #55546A; color: var(--muted); }
+.wk-day.tdy { box-shadow: 0 0 0 3px #2F5DA8; box-shadow: 0 0 0 3px var(--cta); }
+@media print { .wk-btn, .work { display: none !important; } }
+html.tv details.lg:not(.lgb) { display: none !important; }
 .pickup:hover .pk-tip { display: block; }
 html.tv .cta, html.tv .cal, html.tv #dAbbr, html.tv .lgb { display: none !important; }
 html.nofg .page > * + * { margin-top: 20px; }
@@ -155,6 +176,13 @@ details.lg[open] > summary { padding-bottom: 6px; }
 .hint { display: none; margin: 0; padding: 14px 16px; border-radius: 14px; background: #F5B400; color: #1F1700; font-size: 17px; font-weight: 800; line-height: 1.3; }
 .hint svg { flex: none; }
 @media (max-width: 719px) {
+  .wk-btn { margin-left: 0; }
+  .wk-days { flex-direction: column; }
+  .wk-day { display: flex; align-items: baseline; text-align: left; margin: 0 0 6px; padding: 9px 12px; }
+  .wk-day b { width: 34px; }
+  .wk-day small { width: 62px; }
+  .wk-day .k { margin: 0 0 0 auto; }
+  .wk-day .t { margin-left: 12px; min-width: 96px; text-align: right; }
   .head { align-items: stretch; }
   .cta { width: 100%; justify-content: center; }
   .controls { flex-direction: column; align-items: stretch; gap: 8px; }
@@ -197,6 +225,12 @@ details.lg[open] > summary { padding-bottom: 6px; }
       <button type="button" id="btnSubjects" aria-pressed="true">Jednotlivé předměty</button>
       <button type="button" id="btnBlock" aria-pressed="false">Celý školní blok</button>
     </div>
+    <button type="button" class="wk-btn" id="btnWork" aria-pressed="false">Můj pracovní týden</button>
+  </div>
+
+  <div class="work no-print" id="work" hidden>
+    <div class="wk-top"><button type="button" class="wk-nav" id="wkPrev" aria-label="Předchozí týden">‹</button><span class="wk-title" id="wkTitle"></span><button type="button" class="wk-nav" id="wkNext" aria-label="Další týden">›</button></div>
+    <div class="wk-days" id="wkDays"></div>
   </div>
 
   <p class="hint no-print"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M3 9a6 6 0 0 1 3-4M21 15a6 6 0 0 1-3 4"/></svg><span>Otoč telefon na šířku. Rozvrh je na výšku příliš malý, případně si ho přibliž dvěma prsty.</span></p>
@@ -507,6 +541,55 @@ window.onerror = function (m, u, l, c) {
     var m = location.hash === '#predmety' ? 'subjects' : 'block';
     if (m !== mode) { mode = m; render(); }
   });
+
+  /* Pracovní týden: F ranní, X prodloužená ranní, Y zkrácená, S odpolední, V volno. Listopad 2026 po dnech. */
+  var WORK_NOV = 'X X Y F F F V V S S V V X F F F V V F F F X F F V F F F F F'.split(' ');
+  var WK_DAYS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'];
+  var wkOff = 0;
+  function wkMonday() {
+    var n = new Date();
+    var dow = n.getDay();
+    var m = new Date(n.getFullYear(), n.getMonth(), n.getDate() - (dow === 0 ? 6 : dow - 1) + (dow === 0 ? 7 : 0) + wkOff * 7);
+    return m;
+  }
+  function wkInfo(d) {
+    if (d.getFullYear() !== 2026 || d.getMonth() !== 10) return { c: '', k: 'bez údajů', t: '' };
+    var c = WORK_NOV[d.getDate() - 1];
+    if (c === 'F') return { c: 'f', k: 'Ranní', t: '6:00–14:00' };
+    if (c === 'X') return { c: 'f', k: 'Ranní +', t: '6:00–?' };
+    if (c === 'Y') return { c: 'f', k: 'Zkrácená', t: '' };
+    if (c === 'S') return { c: 's', k: 'Odpolední', t: '14:00–19:00' };
+    return { c: 'v', k: 'Volno', t: '' };
+  }
+  function renderWork() {
+    var box = document.getElementById('wkDays');
+    clearKids(box);
+    var mon = wkMonday();
+    var now = new Date();
+    var i, d, inf, cell;
+    for (i = 0; i < 7; i++) {
+      d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
+      inf = wkInfo(d);
+      cell = el('div', 'wk-day ' + inf.c + (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate() ? ' tdy' : ''));
+      cell.appendChild(el('b', null, WK_DAYS[i]));
+      cell.appendChild(el('small', null, d.getDate() + '. ' + (d.getMonth() + 1) + '.'));
+      cell.appendChild(el('span', 'k', inf.k));
+      if (inf.t) cell.appendChild(el('span', 't', inf.t));
+      box.appendChild(cell);
+    }
+    var end = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+    document.getElementById('wkTitle').textContent = mon.getDate() + '. ' + (mon.getMonth() + 1) + '. – ' + end.getDate() + '. ' + (end.getMonth() + 1) + '.';
+  }
+  document.getElementById('btnWork').addEventListener('click', function () {
+    var w = document.getElementById('work');
+    var open = w.hasAttribute('hidden');
+    if (open) { w.removeAttribute('hidden'); renderWork(); } else { w.setAttribute('hidden', ''); }
+    this.setAttribute('aria-pressed', String(open));
+    try { fit(); } catch (e) {}
+  });
+  document.getElementById('wkPrev').addEventListener('click', function () { wkOff--; renderWork(); });
+  document.getElementById('wkNext').addEventListener('click', function () { wkOff++; renderWork(); });
+
   if (location.hash === '#predmety') mode = 'subjects';
   fit();
 })();
