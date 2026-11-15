@@ -273,6 +273,7 @@ window.onerror = function (m, u, l, c) {
     if (text != null) e.textContent = text;
     return e;
   }
+  function clearKids(n) { while (n.firstChild) n.removeChild(n.firstChild); }
   var TW = 900;
   var cv = document.createElement('canvas').getContext('2d');
   function textW(txt, weight, size) {
@@ -320,7 +321,7 @@ window.onerror = function (m, u, l, c) {
 
   function render() {
     var board = document.getElementById('board');
-    board.replaceChildren();
+    clearKids(board);
 
     var axis = el('div', 'row axis');
     axis.appendChild(el('div'));
@@ -385,7 +386,7 @@ window.onerror = function (m, u, l, c) {
     board.appendChild(days);
 
     var lg = document.getElementById('legend');
-    lg.replaceChildren();
+    clearKids(lg);
     function sw(color, text, border) {
       var w = el('div');
       var s = el('span', 'sw');
@@ -402,7 +403,7 @@ window.onerror = function (m, u, l, c) {
 
     document.getElementById('dAbbr').hidden = mode !== 'subjects';
     var ab = document.getElementById('abbr');
-    ab.replaceChildren();
+    clearKids(ab);
     if (mode === 'subjects') {
       ['Čj – český jazyk', 'M – matematika', 'PRV – prvouka', 'VV – výtvarná výchova', 'PC – pracovní činnosti',
        'TV – tělesná výchova', 'AJ – angličtina', 'HV – hudební výchova', 'SOV – společensko-občanská výuka'].forEach(function (t) { ab.appendChild(el('div', null, t)); });
@@ -455,7 +456,24 @@ window.onerror = function (m, u, l, c) {
     }
     try {
       var avail = box.clientWidth;
-      if (tv) { board.style.width = '100%'; TW = avail - 72; render(); return; }
+      if (tv) {
+        board.style.width = '100%'; TW = avail - 72; render();
+        try {
+          var Ht = board.offsetHeight;
+          var roomT = (window.innerHeight || 0) - (box.getBoundingClientRect().top + (window.pageYOffset || 0)) - 24;
+          if (Ht > 0 && roomT > 0 && roomT < Ht) {
+            var zt = Math.max(0.55, roomT / Ht);
+            board.style.width = (avail / zt) + 'px';
+            TW = avail / zt - 72;
+            render();
+            board.style.webkitTransformOrigin = '0 0'; board.style.transformOrigin = '0 0';
+            board.style.webkitTransform = 'scale(' + zt + ')'; board.style.transform = 'scale(' + zt + ')';
+            box.style.height = Math.ceil(board.offsetHeight * zt) + 'px';
+            box.style.overflow = 'hidden';
+          }
+        } catch (e3) {}
+        return;
+      }
       var z = Math.min(1, avail / BASE);
       reset();
       board.style.width = z < 1 ? BASE + 'px' : '100%';
