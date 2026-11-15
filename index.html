@@ -95,11 +95,11 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
   position: relative; height: 104px; box-sizing: border-box; border-radius: 16px;
   background-color: #FFFFFF; background-color: var(--surface); border: 1px solid #EEE7D5; border: 1px solid var(--line);
 }
-.pickup { position: absolute; top: 0; bottom: 0; background-image: repeating-linear-gradient(135deg, #EEE7D5 0 2px, transparent 2px 9px); background-image: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 9px); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pickup { position: absolute; top: 0; bottom: 0; background-image: linear-gradient(135deg, #EEE7D5 25%, transparent 25%, transparent 50%, #EEE7D5 50%, #EEE7D5 75%, transparent 75%, transparent); background-image: linear-gradient(135deg, var(--line) 25%, transparent 25%, transparent 50%, var(--line) 50%, var(--line) 75%, transparent 75%, transparent); background-size: 12px 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .pk-legend { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #55546A; color: var(--muted); margin-top: -6px; }
-.pk-sw { flex: none; width: 34px; height: 18px; border-radius: 5px; border: 1px solid #55546A; border: 1px solid var(--muted); background-image: repeating-linear-gradient(135deg, #55546A 0 2px, transparent 2px 6px); background-image: repeating-linear-gradient(135deg, var(--muted) 0 2px, transparent 2px 6px); }
+.pk-sw { flex: none; width: 34px; height: 18px; border-radius: 5px; border: 1px solid #55546A; border: 1px solid var(--muted); background-image: linear-gradient(135deg, #55546A 25%, transparent 25%, transparent 50%, #55546A 50%, #55546A 75%, transparent 75%, transparent); background-image: linear-gradient(135deg, var(--muted) 25%, transparent 25%, transparent 50%, var(--muted) 50%, var(--muted) 75%, transparent 75%, transparent); background-size: 8px 8px; }
 .pickup:hover .pk-tip { display: block; }
-html.tv .cta { display: none !important; }
+html.tv .cta, html.tv .cal, html.tv #dAbbr { display: none !important; }
 html.nofg .page > * + * { margin-top: 20px; }
 html.nofg .board > * + * { margin-top: 8px; }
 html.nofg .days > * + * { margin-top: 10px; }
@@ -116,7 +116,7 @@ html.nofg .abbr > * { margin: 3px 18px 3px 0; }
 .pickup.open .pk-tip { display: block; }
 @media print { .noprint { display: none; } .pk-tip { display: none !important; } .pickup { cursor: auto; } }
 .vl { position: absolute; top: 0; bottom: 0; width: 1px; background: #EEE7D5; background: var(--line); }
-.gap { position: absolute; top: 0; bottom: 0; left: 45%; width: 8%; background-image: repeating-linear-gradient(135deg, #EEE7D5 0 2px, transparent 2px 9px); background-image: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 9px); }
+.gap { position: absolute; top: 0; bottom: 0; left: 45%; width: 8%; background-image: linear-gradient(135deg, #EEE7D5 25%, transparent 25%, transparent 50%, #EEE7D5 50%, #EEE7D5 75%, transparent 75%, transparent); background-image: linear-gradient(135deg, var(--line) 25%, transparent 25%, transparent 50%, var(--line) 50%, var(--line) 75%, transparent 75%, transparent); background-size: 12px 12px; }
 .chip {
   justify-self: center; width: 52px; height: 52px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -425,25 +425,43 @@ details.lg[open] > summary { padding-bottom: 6px; }
   } catch (e) {}
 
   var BASE = 1000;
+  function isTv() { return /(^| )tv( |$)/.test(document.documentElement.className); }
   function fit() {
     var box = document.querySelector('.scroll');
     var board = document.getElementById('board');
-    var avail = box.clientWidth;
-    var z = Math.min(1, avail / BASE);
-    board.style.zoom = '';
-    board.style.width = z < 1 ? BASE + 'px' : '100%';
-    TW = (z < 1 ? BASE : avail) - 72;
-    render();
-    var H = board.offsetHeight;
-    var top = box.getBoundingClientRect().top + (window.pageYOffset || 0);
-    var room = (window.innerHeight || 0) - top - 24;
-    if (H > 0 && room > 0 && room / H < z && window.innerWidth > window.innerHeight) {
-      z = Math.max(0.55, room / H);
-      board.style.width = (avail / z) + 'px';
-      TW = avail / z - 72;
-      render();
+    var tv = isTv();
+    function reset() {
+      board.style.zoom = ''; board.style.transform = ''; board.style.transformOrigin = '';
+      box.style.height = '';
     }
-    board.style.zoom = z < 1 ? String(z) : '';
+    function apply(z, avail) {
+      if (z >= 1) { board.style.width = '100%'; return; }
+      if (tv) {
+        board.style.transformOrigin = '0 0';
+        board.style.transform = 'scale(' + z + ')';
+        box.style.height = Math.ceil(board.offsetHeight * z) + 'px';
+      } else board.style.zoom = String(z);
+    }
+    try {
+      var avail = box.clientWidth;
+      var z = Math.min(1, avail / BASE);
+      reset();
+      board.style.width = z < 1 ? BASE + 'px' : '100%';
+      TW = (z < 1 ? BASE : avail) - 72;
+      render();
+      var H = board.offsetHeight;
+      var top = box.getBoundingClientRect().top + (window.pageYOffset || 0);
+      var room = (window.innerHeight || 0) - top - 24;
+      if (H > 0 && room > 0 && room / H < z && window.innerWidth > window.innerHeight) {
+        z = Math.max(0.55, room / H);
+        board.style.width = (avail / z) + 'px';
+        TW = avail / z - 72;
+        render();
+      }
+      apply(z, avail);
+    } catch (e) {
+      try { reset(); board.style.width = '100%'; TW = Math.max(600, box.clientWidth) - 72; render(); } catch (e2) {}
+    }
   }
   window.addEventListener('resize', fit);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) render(); });
