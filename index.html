@@ -99,6 +99,7 @@ h1 { margin: 0; font-size: clamp(32px, 5vw, 48px); font-weight: 800; line-height
 .pk-legend { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #55546A; color: var(--muted); margin-top: -6px; }
 .pk-sw { flex: none; width: 34px; height: 18px; border-radius: 5px; border: 1px solid #55546A; border: 1px solid var(--muted); background-image: repeating-linear-gradient(135deg, #55546A 0 2px, transparent 2px 6px); background-image: repeating-linear-gradient(135deg, var(--muted) 0 2px, transparent 2px 6px); }
 .pickup:hover .pk-tip { display: block; }
+html.tv .cta { display: none !important; }
 html.nofg .page > * + * { margin-top: 20px; }
 html.nofg .board > * + * { margin-top: 8px; }
 html.nofg .days > * + * { margin-top: 10px; }
@@ -417,6 +418,10 @@ details.lg[open] > summary { padding-bottom: 6px; }
     document.body.appendChild(tf);
     if (tf.offsetHeight < 3) document.documentElement.className += ' nofg';
     document.body.removeChild(tf);
+  } catch (e) {}
+
+  try {
+    if (/smart-?tv|tizen|web0s|webos|hbbtv|netcast|bravia|aquos|viera|googletv|appletv|crkey|roku/i.test(navigator.userAgent)) document.documentElement.className += ' tv';
   } catch (e) {}
 
   var BASE = 1000;
