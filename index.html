@@ -138,6 +138,11 @@ html.tv body { padding: 12px 20px; }
 .work.wk-full .wk-day .k { font-size: 3vh; margin-top: 0.8vh; }
 .work.wk-full .wk-day .t { font-size: 2.4vh; margin-top: 0.4vh; }
 .work.wk-full .wk-top { margin-bottom: 2vh; }
+.lunch { background: #FFFFFF; background: var(--surface); border: 1px solid #EEE7D5; border: 1px solid var(--line); border-radius: 14px; padding: 10px 16px; font-size: 16px; line-height: 1.5; color: #2B2B33; color: var(--fg); }
+.lunch .lh { font-weight: 800; margin-right: 14px; }
+.lunch .ln { display: inline-block; margin-right: 18px; font-weight: 600; }
+.lunch .ln b { font-weight: 800; color: #55546A; color: var(--muted); margin-right: 4px; }
+html.tv .lunch { font-size: 2.3vh; padding: 1vh 2vh; }
 .pickup:hover .pk-tip { display: block; }
 html.tv .cta, html.tv .cal, html.tv #dAbbr, html.tv .lgb { display: none !important; }
 html.nofg .page > * + * { margin-top: 20px; }
@@ -246,6 +251,8 @@ details.lg[open] > summary { padding-bottom: 6px; }
     </div>
     <button type="button" class="wk-btn" id="btnWork" aria-pressed="false">Můj pracovní týden</button>
   </div>
+
+  <div class="lunch no-print" id="lunch" hidden></div>
 
   <div class="work no-print" id="work" hidden>
     <div class="wk-top"><button type="button" class="wk-nav" id="wkPrev" aria-label="Předchozí týden">‹</button><span class="wk-title" id="wkTitle"></span><button type="button" class="wk-nav" id="wkNext" aria-label="Další týden">›</button></div>
@@ -634,6 +641,45 @@ window.onerror = function (m, u, l, c) {
   window.addEventListener('resize', layoutWork);
   document.getElementById('wkPrev').addEventListener('click', function () { wkOff--; renderWork(); });
   document.getElementById('wkNext').addEventListener('click', function () { wkOff++; renderWork(); });
+
+
+  /* Oběd: obed.json = { "2026-11-20": { "polevka": "...", "obedy": ["...", "..."], "doplnek": "..." } } */
+  var LUNCH = null;
+  function ymd(d) { return d.getFullYear() + '-' + ((d.getMonth() + 1) < 10 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate(); }
+  function renderLunch() {
+    var box = document.getElementById('lunch');
+    var day = LUNCH && LUNCH[ymd(new Date())];
+    if (!day) { box.setAttribute('hidden', ''); return; }
+    clearKids(box);
+    box.appendChild(el('span', 'lh', 'Dnes k obědu'));
+    function part(lbl, txt) {
+      if (!txt) return;
+      var sp = el('span', 'ln');
+      sp.appendChild(el('b', null, lbl));
+      sp.appendChild(document.createTextNode(txt));
+      box.appendChild(sp);
+    }
+    part('Polévka', day.polevka);
+    var ob = day.obedy || [];
+    for (var i = 0; i < ob.length; i++) part(ob.length > 1 ? (i + 1) + ')' : 'Oběd', ob[i]);
+    part('Doplněk', day.doplnek);
+    box.removeAttribute('hidden');
+    try { fit(); } catch (e) {}
+  }
+  function loadLunch() {
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', 'obed.json?t=' + new Date().getTime(), true);
+      x.onreadystatechange = function () {
+        if (x.readyState !== 4) return;
+        try { if (x.status === 200) { LUNCH = JSON.parse(x.responseText); } } catch (e) {}
+        renderLunch();
+      };
+      x.send();
+    } catch (e) {}
+  }
+  loadLunch();
+  setInterval(loadLunch, 30 * 60 * 1000);
 
   if (location.hash === '#predmety') mode = 'subjects';
   fit();
